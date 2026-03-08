@@ -1,24 +1,50 @@
 import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+import { NextRequest } from "next/server";
+
+const routeAccess: Record<string, string[]> = {
+  "/admin": ["admin"],
+  "/dashboard": ["user", "admin"],
+  "/pro": ["pro", "admin"]
+};
+
+const roleRedirect: Record<string, string> = {
+  admin: "/admin",
+  user: "/dashboard",
+  pro: "/pro"
+};
 
 export function middleware(req: NextRequest) {
 
   const role = req.cookies.get("role")?.value;
+  const { pathname } = req.nextUrl;
 
-  const url = req.nextUrl;
+  if (pathname === "/") {
 
-  if (url.pathname.startsWith("/admin")) {
-
-    if (role !== "admin") {
+    if (!role) {
       return NextResponse.redirect(new URL("/login", req.url));
+    }
+
+    return NextResponse.redirect(new URL(roleRedirect[role], req.url));
+  }
+
+  if (pathname === "/login" || pathname === "/signup") {
+
+    if (role) {
+      return NextResponse.redirect(new URL(roleRedirect[role], req.url));
     }
 
   }
 
-  if (url.pathname.startsWith("/dashboard")) {
+  for (const route in routeAccess) {
 
-    if (!role && role !== "user") {
+    if (pathname.startsWith(route)) {
+
+      const allowedRoles = routeAccess[route];
+
+      if (!role || !allowedRoles.includes(role)) {
         return NextResponse.redirect(new URL("/login", req.url));
+      }
+
     }
 
   }
@@ -27,5 +53,5 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/dashboard/:path*"]
+  matcher: ["/", "/admin/:path*", "/dashboard/:path*", "/pro/:path*", "/login", "/signup"]
 };
