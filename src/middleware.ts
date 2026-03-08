@@ -15,9 +15,17 @@ export function middleware(req: NextRequest) {
 
   }
 
+  if (url.pathname.startsWith("/dashboard")) {
+
+    if (!role && role !== "user") {
+        return NextResponse.redirect(new URL("/login", req.url));
+    }
+
+  }
+
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/admin/:path*"]
+  matcher: ["/admin/:path*", "/dashboard/:path*"]
 };
