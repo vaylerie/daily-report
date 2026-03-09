@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { signInWithEmailAndPassword, getIdToken } from "firebase/auth";
+import { auth } from "@/lib/firebase";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -20,8 +22,6 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 
-import { loginUser } from "@/services/auth.service";
-
 export function LoginForm({
   className,
   ...props
@@ -37,11 +37,30 @@ export function LoginForm({
 
     try {
 
-      const user = await loginUser(email, password);
+      // Firebase login
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
 
-      document.cookie = `role=${user.role}; path=/`;
+      // Get Firebase ID Token
+      const idToken = await getIdToken(user);
 
-      if (user.role === "admin") {
+      // Send token to server to create secure session
+      const response = await fetch("/api/auth/session", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ idToken }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Session creation failed");
+      }
+
+      const data = await response.json();
+
+      // Redirect based on role from verified session
+      if (data.role === "admin") {
         router.push("/admin");
       } else {
         router.push("/dashboard");

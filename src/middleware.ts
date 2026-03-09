@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import { NextRequest } from "next/server";
+import { getSession } from "@/lib/session";
 
 const routeAccess: Record<string, string[]> = {
   "/admin": ["admin"],
-  "/dashboard": ["user", "admin"],
-  "/pro": ["pro", "admin"]
+  "/dashboard": ["user"],
+  "/pro": ["pro"]
 };
 
 const roleRedirect: Record<string, string> = {
@@ -13,9 +14,11 @@ const roleRedirect: Record<string, string> = {
   pro: "/pro"
 };
 
-export function middleware(req: NextRequest) {
+export async function middleware(req: NextRequest) {
 
-  const role = req.cookies.get("role")?.value;
+  const session = await getSession();
+  const role = session?.role;
+  
   const { pathname } = req.nextUrl;
 
   if (pathname === "/") {
