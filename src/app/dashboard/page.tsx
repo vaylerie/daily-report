@@ -18,9 +18,11 @@ export default function DashboardPage() {
   };
 
   return (
-    <div>
-      <h1>User Dashboard</h1>
-      <button onClick={handleLogout}>Logout</button>
+    <div className="p-4">
+      <h1 className="text-2xl font-bold">My Daily Report</h1>
+      <button onClick={handleLogout} className="mt-4 px-4 py-2 bg-red-500 text-white rounded">
+        Logout
+      </button>
     </div>
   );
 }
