@@ -2,6 +2,9 @@
 
 import * as React from "react"
 import { usePathname } from "next/navigation"
+import { signOut } from "firebase/auth";
+import { auth } from "@/lib/firebase";
+import { useRouter } from "next/navigation";
 
 import {
   Sidebar,
@@ -38,7 +41,17 @@ const data = {
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const pathname = usePathname()
+  const pathname = usePathname();
+  const router = useRouter();
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      await fetch("/api/auth/logout", { method: "POST" });
+      router.push("/login");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
 
   return (
     <Sidebar variant="floating" {...props}>
@@ -81,6 +94,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
                     ))}
+                        <SidebarMenuSubButton 
+                          asChild 
+                          isActive={false}
+                          className="text-red-500 hover:text-red-700 mt-4"
+                        >
+                          <button onClick={handleLogout}>Logout</button>
+                        </SidebarMenuSubButton>                  
                   </SidebarMenuSub>
                 ) : null}
               </SidebarMenuItem>

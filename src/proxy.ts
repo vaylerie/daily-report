@@ -14,7 +14,7 @@ const roleRedirect: Record<string, string> = {
   pro: "/pro"
 };
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
 
   const session = await getSession();
   const role = session?.role;
