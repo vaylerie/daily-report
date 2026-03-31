@@ -13,6 +13,7 @@ import {
     serverTimestamp
 } from "firebase/firestore";
 import { DailyReport } from "@/types/report.type";
+import { generateId } from "@/lib/utils";
 
 export async function createDaily(
     userId: string,
@@ -25,7 +26,7 @@ export async function createDaily(
         planTomorrow?: string,        
     }
 ) {
-    const id = `${userId}-${Date.now()}`;
+    const id = generateId(userId);
 
     await setDoc(doc(db, "reports", id), {
         id,
